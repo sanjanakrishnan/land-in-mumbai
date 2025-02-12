@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>title</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<!-- Leaflet CSS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+		crossorigin="" />
+
+	<link rel="stylesheet" href="scripts/leaflet-search.css" />
+
+
+	<!-- Fonts -->
+	<!-- <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,800;1,800&display=swap"
+		rel="stylesheet">  -->
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+	<style>
+		body {
+			background: #20282e;
+			/*font-family: 'Open Sans', sans-serif; */
+			font-weight: 400;
+		}
+
+		h1 {
+			font-weight: 800;
+			font-family: 'Roboto', sans-serif; 
+		}
+
+		p {
+			line-height: 1.7rem;
+			font-family: 'Roboto', sans-serif; 
+		}
+
+		#map {
+			height: 70vh;
+			background: #20282e;
+		}
+
+		#legend {
+			font-size: 1rem;
+			border-radius: 5px;
+			max-width: 200px;
+			/*font-family: 'Open Sans', sans-serif;*/
+		}
+
+		#legend span {
+			width: 20px;
+			height: 20px;
+			float: left;
+			margin: 0 10px 4px 0;
+		}
+
+		#legend label {
+			font-size: 0.9rem;
+		}
+
+		#legend label:after {
+			content: '';
+			display: block;
+			clear: both;
+		}
+
+		.tooltip {
+			position: relative;
+			display: inline-block;
+			border-bottom: 1px dotted black;
+			/* If you want dots under the hoverable text */
+		}
+
+		.tooltiptext {
+			visibility: hidden;
+			width: 120px;
+			background-color: black;
+			color: #fff;
+			text-align: center;
+			padding: 5px 0;
+			border-radius: 6px;
+
+			/* Position the tooltip text - see examples below! */
+			position: absolute;
+			z-index: 1;
+		}
+
+		/* Small devices (landscape phones, 576px and up) */
+		@media (min-width: 576px) {
+			#map {
+				height: 80vh;
+
+			}
+		}
+
+		/* Medium devices (tablets, 768px and up) */
+		@media (min-width: 768px) {
+
+			aside {
+				height: 80vh;
+			}
+		}
+
+		/* Large devices (desktops, 992px and up) */
+		@media (min-width: 992px) {}
+
+		/* Extra large devices (large desktops, 1200px and up) */
+		@media (min-width: 1200px) {}
+
+		/* show those elements that match their language class */
+	</style>
+
+</head>
+
+<body>
+	<div class="container-fluid">
+		<header class="row bg-dark text-white py-3">
+			<div class="col">
+				<!--h1>Who owns land in Mumbai?</h1-->
+				<h1>
+					<div id="heading">Land ownership and occupation: Mumbai's contested cityscape</div>
+				</h1>
+			</div>
+
+			<!--Create drop down to change language, link with fun changeLang in js-->
+			<form action="">
+				<select type="text" id="dropBox" onchange="changeLang()">
+					<option value="en">English</option>
+					<option value="hi">हिंदी</option>
+					<option value="mr">मराठी</option>
+				</select>
+
+				<!--div id="divText">No template applied</div-->
+			</form>
+		</header>
+
+		<section class="row">
+			<!--div class="col-md-8 col-lg-9 col-xl-10 order-md-2 px-0"-->
+			<div class="col-md-9 col-lg-7 col-xl-8 order-md-2 px-0">
+				<div id="map"></div>
+			</div>
+			<aside id="about"
+				class="col-md-3 col-lg-5 col-xl-4 order-md-1 text-white py-2 pl-3 bg-secondary overflow-auto">
+				<section>
+
+					<h3 class="py-2">
+						<div id="aboutMap">About this map</div>
+					</h3>
+					<div id=infoTab>
+						<p>The map shows who owns the land that informal settlements are built on. <br><br>
+							<img src="images/click.png" style="background-color:white;" width="40" height="40"></img> 
+							Click on a feature to see information on cluster ID, CTS number, and land owner.<br><br>
+							<img src="images/search-icon2.jpeg" style="background-color:white;" width="40" height="40"></img> 
+							Search for settlements by their name using the search icon on the map<br><br>
+							<img src="images/language.png" width="80" height="70" ></img> 
+							Change the language with the drop down<br>
+							
+						</p>
+						<p>This map uses data that from the Slum Rehabilitation Authority (SRA) and the Municipal Corporation of greater Mumbai (MCGM)
+							obtained in December 2020.
+							The dataset obtained has attributes on 'Cluster name', 'CTS number', 'Ownership' and 'Land holder's name'
+							for informal settlement clusters in Mumbai.
+							<br>Read documentation on the project in this <a href="https://github.com/sanjana-krish/land-in-mumbai#readme" target="_blank">link</a>
+						</p>
+
+					</div>
+				</section>
+			</aside>
+
+		</section>
+
+		<footer class="row bg-dark text-white py-3">
+			<div class="col">
+				<!-- <p style="font-size: 0.8em;">
+					Authored by <a href="https://github.com/sanjana-krish" target="_blank">sanjana</a> | Date: Dec 2022
+					<br>
+					Data sources: SRA, MCGM | leaflet search <a href="https://github.com/stefanocudini/leaflet-search"
+					target="_blank">Copyright (c) 2013-2020 Stefano Cudini</a>
+				</p> -->
+				<ul style="font-size: 0.8em;" class="list-unstyled">
+					<div id=sources>
+						<li>authored by <a href="https://sanjana-krish.github.io/sanjana-krish/" target="_blank">sanjana</a> | Date:
+							Dec 2022</li>
+						<li>Data sources: SRA, MCGM | leaflet search <a
+								href="https://github.com/stefanocudini/leaflet-search" target="_blank">Copyright (c)
+								2013-2020 Stefano Cudini</a></li>
+					</div>
+				</ul>
+			</div>
+		</footer>
+	</div>
+
+	<!-- legend is outside of container-fluid and will be dynamically added to map -->
+	<div class="bg-secondary py-2 px-3 ml-3 mt-3 text-white" id="legend"></div>
+
+	<!-- Add Bootstrap -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+		integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
+	</script>
+	<!-- then Leaflet JS -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+		crossorigin=""></script>
+	<!-- then Simple Statistics -->
+	<script src='https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js'></script>
+
+	<!--Jquery for language change-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<!--For local search-->
+	<script src="scripts/leaflet-search.js"></script>
+
+	<!--script src="scripts/helper/require.js"></script-->
+
+	<script>
+		// initial Leaflet map optionst
+		const options = {
+			zoomSnap: .1,
+			//center: [19.076, 72.97], //[40, -90],
+			zoom: 11, //4,
+			zoomControl: false,
+
+		}
+
+		// create Leaflet map and apply options
+		const map = L.map('map', options);
+		const zoom = new L.control.zoom({
+			position: "topleft"
+		}).addTo(map);
+
+
+
+		// request a basemap tile layer and add to the map
+		// L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+		// 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		// }).addTo(map);
+
+		// request a basemap tile layer and add to the map
+		// L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		// 	attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+		// }).addTo(map);
+
+		L.tileLayer(
+			'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+			}).addTo(map);
+
+		//Add global search functionality to the map
+		// from https://github.com/Esri/esri-leaflet-geocoder
+
+
+		// fetch data from a remote source
+		//fetch("data/landRevised_OWNERSHIPandHOLDER.geojson")
+		fetch("data/informal-settlements-by-ownership.geojson")
+			// after it is returned...
+			.then(function (response) {
+				// if has a property called ok, and it is true
+				if (response.ok) {
+					// The API call was successful!
+					// Parse the JSON into a useable format, then return it
+					//console.log(response.json)
+					return response.json();
+				} else {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+			})
+			// The returned response is now data in a new then method
+			.then(function (data) {
+				// This is the JSON from our response
+				console.log("data is ", data);
+				// Pass the data to the drawMap function
+				drawMap(data);
+
+				// var searchLayer = L.layerGroup().addTo(map);
+				// //... adding data in searchLayer ...
+				// map.addControl(new L.Control.Search({
+				// 	layer: data
+				// }));
+				//searchLayer is a L.LayerGroup contains searched markers
+
+			});
+
+
+
+
+		function drawMap(data) {
+			// function is called one time, once the data is properly loaded. creates a new L.geoJson object and adds it to map, including basic
+			// options for the map as well as some interactive mouseover style changes.
+			// function then calls other functions to add the legend, update the map's thematic encoding (color), and add the UI dropdown element
+			console.log("drawMap function is working");
+			// create Leaflet data layer and add to map
+			const wards = L.geoJson(data, {
+				// style wards with initial default path options
+				style: function (feature) {
+					return {
+						color: "#20282e",
+						weight: 0.5,
+						fillOpacity: 0.5,
+						fillColor: "#1f78b4",
+					};
+				},
+
+				// add hover/touch functionality to each feature layer
+				onEachFeature: function (feature, layer) {
+					// when mousing over a layer
+					layer.on("mouseover", function () {
+						// change the stroke color and bring that element to the front
+						layer
+							.setStyle({
+								color: "#ff6e00",
+							})
+							.bringToFront();
+					});
+
+					// on mousing off layer
+					layer.on("mouseout", function () {
+						// reset the layer style to its original stroke color
+						layer.setStyle({
+							color: "#20282e",
+						});
+					});
+					//console.log("attr val is ", layer.feature.properties[attributeValue]);
+					//console.log("norm val is ", layer.feature.properties[normValue]);
+				},
+			}).addTo(map);
+
+			// fit the map's bounds and zoom level using the wards extent
+			map.fitBounds(wards.getBounds(), {
+				// padding: [50, 0], // add padding around wards
+				paddingBottomRight: [100, 0],
+				animate: false
+			});
+
+			//updateMap(wards); // draw the map	
+
+
+			console.log("wards obj ", wards);
+
+			// get the class breaks for the current data attribute
+			const breaks = getClassBreaks(wards);
+
+			// loop through each wards layer to update the color and tooltip info
+			wards.eachLayer(function (layer) {
+				const props = layer.feature.properties;
+				//console.log("layer.feature.props top owner is", props["top_owner"]);
+				//console.log("layer.feature.props ownership is", props.OWNERSHIP); //CHANGE TO OWNERSHIP LATER
+
+				//replace \n from text line with <br> for HTML
+				//props["top_owner"] = props["top_owner"].replace(/(?:\r\n|\r|\n)/g, '<br>');
+
+				// set the fill color of layer based on its normalized data value
+				layer.setStyle({
+					//fillColor: getColor(props[attributeValue] / props[normValue], breaks),
+					//fillColor: "red",
+					fillColor: getColor(props["OWNERSHIP2"]),
+				});
+
+				// assemble string sequence of info for tooltip (end line break with + operator)
+				// 	let tooltipInfo = `ward ${props["WARD"]} </br>
+				// ownership category: ${props["OWNERSHIP"]}</br>
+				// holder name: ${props["HOLDER_NAME"]}`
+
+				let tooltipInfo = `<b>${props["slum_name"]}</b> </br>
+						SRA 2016 cluster ID: ${props["cluster_id"]} </br>
+						Nearest landmark: ${props["nearest_la"]}</br>
+						CTS numbers: ${props["cts_id"]}</br>
+						ownership category: ${props["OWNERSHIP"]}</br>
+						holder name: ${props["HOLDER_NAME"]}</br>
+						Area: of cluster ${props["cluster_ar"]}`
+
+				// bind a tooltip to layer with ward-specific information
+				layer.bindTooltip(tooltipInfo, {
+					// sticky property so tooltip follows the mouse
+					sticky: true,
+				});
+			});
+			addLegend(breaks);
+
+			var searchControl = new L.Control.Search({
+				layer: wards,
+				propertyName: 'slum_name',
+				marker: false,
+				moveToLocation: function (latlng, title, map) {
+					//map.fitBounds( latlng.layer.getBounds() );
+					var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+					map.setView(latlng, zoom); // access the zoom
+				}
+			});
+
+			searchControl.on('search:locationfound', function (e) {
+
+				console.log('search:locationfound', );
+
+				//map.removeLayer(this._markerSearch)
+
+				e.layer.setStyle({
+					fillColor: '#3f0',
+					color: '#0f0'
+				});
+				if (e.layer._popup)
+					e.layer.openPopup();
+
+			}).on('search:collapsed', function (e) {
+
+				featuresLayer.eachLayer(function (layer) { //restore feature color
+					featuresLayer.resetStyle(layer);
+				});
+			});
+
+			map.addControl(searchControl); //inizialize search control
+		}
+
+
+		function getClassBreaks(wards) {
+			// function accepts the Leaflet L.GeoJson LayerGroup as a parameter and loops through the feature properties
+			// to derive a set of classification breaks based upon the current selected attribute. function returns these breaks as an array
+
+			// create empty Array for storing values
+			const values = [];
+
+			// loop through all the wards
+			wards.eachLayer(function (layer) {
+				let value =
+					layer.feature.properties["OWNERSHIP2"] // layer.feature.properties[normValue];
+				values.push(value); // push the normalized value for each layer into the Array
+			});
+
+			const breaks = (values.filter(onlyUnique));
+			//breaks.sort((a, b) => a.localeCompare(b)) //to sort alphabetically
+
+			console.log("breaks are ", breaks);
+			//return array of arrays, e.g., [[0.24,0.25], [0.26, 0.37], etc]
+			return breaks;
+		}
+
+		function getColor(props) {
+			// function accepts a single normalized data attribute value and an array of breaks as two parameters and
+			// uses a series of conditional statements to determine which which color value to return to return to the function caller
+			if (props == "Central Government") {
+				return "#4053d3";
+			} else if (props == "State Government") {
+				return "#ddb310";
+			} else if (props == "MCGM") {
+				return "#b51d14";
+			} else if (props == "Knoti(private trust)") {
+				return "#00beff";
+			} else if (props == "Private Land") {
+				return "#fb49b0";
+			} else if (props == "Gaothan") {
+				return "#00b25d";
+			} else {
+				return "#cacaca";
+			}
+		}
+
+		function addLegend(breaks) {
+			// function is called once, selects a DOM element to hold the map legend, and adds it as a Leaflet control element
+			// create a new Leaflet control object, and position it top left
+
+			// check your console to verify the breaks array
+			console.log("breaks are: ", breaks);
+
+			let position = "bottomright";
+			if (L.Browser.mobile) {
+				position = "topright";
+				map.removeControl(zoom)
+			}
+
+			// create a new Leaflet control object, and position it top left
+			const legendControl = L.control({
+				//position: "topleft"
+				position: position
+			});
+
+			// when the legend is added to the map
+			legendControl.onAdd = function () {
+				// select a div element with an id attribute of legend
+				const legend = L.DomUtil.get("legend");
+
+				// disable scroll and click/touch on map when on legend
+				L.DomEvent.disableScrollPropagation(legend);
+				L.DomEvent.disableClickPropagation(legend);
+
+				// return the selection to the method
+				return legend;
+			};
+
+			// add the empty legend div to the map
+			legendControl.addTo(map);
+
+			// add colours and text to legend
+			//uses break values as a parameter and drawsthe legend based upon these values
+			// select the legend, add a title, begin an unordered list and assign to a variable
+
+			const legend2 = document.querySelector("#legend")
+			legend2.innerHTML = `<h5>land owned by</h5>`;
+
+			console.log("breaks length is ", breaks.length);
+			console.log("breaks[0] is ", breaks[0]);
+			console.log("breaks[0][0] is ", breaks[0][0]);
+			// loop through the Array of classification break values
+			for (let i = 0; i <= breaks.length - 1; i++) {
+				let color = getColor(breaks[i]);
+				legend2.innerHTML += `<div>
+				<span style="background:${color}"></span>
+				<label>${breaks[i]}</label></div>`; //);
+			}
+
+		}
+
+		function onlyUnique(value, index, self) {
+			return self.indexOf(value) === index;
+		}
+
+		function changeLang() {
+			if (document.getElementById("dropBox").value == "en") {
+				document.getElementById("heading").textContent =
+					"Land ownership and occupation: Mumbai's contested cityscape";
+				document.getElementById("aboutMap").innerHTML = "About this map";
+				document.getElementById("infoTab").innerHTML =
+					"<p>The map shows who owns the land that informal settlements are built on. <br><br><img src=\"images/click.png\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> Click on a feature to see information on cluster ID, CTS number, and land owner.<br><br><img src=\"images/search-icon2.jpeg\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> Search for settlements by their name using the search icon on the map<br><br><img src=\"images/language.png\" width=\"80\" height=\"70\" ></img> Change the language with the drop down<br></p><p>This map uses data that from the Slum Rehabilitation Authority (SRA) and the Municipal Corporation of greater Mumbai (MCGM) as of December 2020. The dataset obtained has attributes on 'Cluster name', 'CTS number', 'Ownership' and 'Land holder's name' for informal settlement clusters in Mumbai. <br>Read documentation on the project in this <a href=\"https://github.com/sanjana-krish/land-in-mumbai#readme\" target=\"_blank\">link</a></p>";
+				// can use + string + between to put in multiple lines
+				document.getElementById("sources").innerHTML =
+					"<li>authored by <a href=\"https://sanjana-krish.github.io/sanjana-krish/\" target=\"_blank\">sanjana</a> | Date: Dec 2022</li><li>Data sources: SRA, MCGM | leaflet search <a href=\"https://github.com/stefanocudini/leaflet-search\" target=\"_blank\">Copyright (c) 2013-2020 Stefano Cudini</a></li>"
+			} else if (document.getElementById("dropBox").value == "hi") {
+				document.getElementById("heading").innerHTML = "जमीन के मालिक और निवासी: मुंबई के विवादित स्थल";
+				document.getElementById("aboutMap").innerHTML = "इस नक्शे की जानकारी";
+				document.getElementById("infoTab").innerHTML =
+					"<p>यह नक्शा दिखाता है कि जिस जमीन पर अनौपचारिक बस्तियां बनी हैं, उसका मालिक कौन है। <br><br><img src=\"images/click.png\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> क्लस्टर आईडी, सीटीएस नंबर और जमीन के मालिक की जानकारी देखने के लिए इस बटन पर क्लिक करें।<br><br><img src=\"images/search-icon2.jpeg\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> मानचित्र पर खोज आइकन का उपयोग करके बस्तियों को उनके नाम से खोजें<br><br><img src=\"images/language.png\" width=\"80\" height=\"70\" ></img> ड्रॉप डाउन के साथ भाषा बदलें<br></p><p>यह मानचित्र स्लम पुनर्वास प्राधिकरण (एसआरए) और ग्रेटर मुंबई नगर निगम (एमसीजीएम) से दिसंबर 2020 तक के डेटा का उपयोग करता है। प्राप्त डेटासेट में 'क्लस्टर नाम', 'सीटीएस नंबर', 'स्वामित्व' और 'भूमि' की विशेषताएं हैं। मुंबई में अनौपचारिक बंदोबस्त समूहों के लिए धारक का नाम'। <br> नक़्शे पर अधिक जानकारी के लिए, इस <a href=\"https://github.com/sanjana-krish/land-in-mumbai#readme\" target=\"_blank\">लिंक</a> पर जाएँ</p>";
+				document.getElementById("sources").innerHTML =
+					"<li>नकाशा निर्माता <a href=\"https://sanjana-krish.github.io/sanjana-krish/\" target=\"_blank\">संजना</a> | दिनांक: दिसंबर 2022</li><li>डेटा स्रोत: एसआरए, एमसीजीएम | लीफलेट खोज <a href=\"https://github.com/stefanocudini/leaflet-search\" target=\"_blank\">कॉपीराइट (सी) 2013-2020 स्टेफानो कुदिनी</a></li>"
+			} else if (document.getElementById("dropBox").value == "mr") {
+				document.getElementById("heading").innerHTML = "जमीन मालक आणि रहिवासी: मुंबईतील वादग्रस्त जागा";
+				document.getElementById("aboutMap").innerHTML = "या नकाशाबद्दल";
+				document.getElementById("infoTab").innerHTML =
+					"<p>हा नकाशा दाखवतो की ज्या जमिनीवर अनौपचारिक वसाहती बांधल्या जातात ती जमीन कोणाच्या मालकीची आहे. <br><br><img src=\"images/click.png\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> क्लस्टर आयडी, सीटीएस क्रमांक आणि जमीन मालक तपशील पाहण्यासाठी या बटणावर क्लिक करा.<br><br><img src=\"images/search-icon2.jpeg\" style=\"background-color:white;\" width=\"40\" height=\"40\"></img> नकाशावरील शोध चिन्ह वापरून त्यांच्या नावाने सेटलमेंट शोधा<br><br><img src=\"images/language.png\" width=\"80\" height=\"70\" ></img> ड्रॉप डाउन सह भाषा बदला<br></p><p>हा नकाशा डिसेंबर 2020 पर्यंत झोपडपट्टी पुनर्वसन प्राधिकरण (SRA) आणि बृहन्मुंबई महानगरपालिका (MCGM) कडील डेटा वापरतो. मिळवलेल्या डेटासेटमध्ये 'क्लस्टरचे नाव', 'CTS क्रमांक', 'मालकी' आणि 'जमीन' वरील गुणधर्म आहेत. मुंबईतील अनौपचारिक सेटलमेंट क्लस्टर्ससाठी धारकाचे नाव. <br> नकाशावरील अधिक माहितीसाठी, या <a href=\"https://github.com/sanjana-krish/land-in-mumbai#readme\" target=\"_blank\">लिंक</a> भेट द्या</p>";
+				document.getElementById("sources").innerHTML =
+					"<li>नकाशा निर्माता <a href=\"https://sanjana-krish.github.io/sanjana-krish/\" target=\"_blank\">संजना</a> | दिनांक: दिसंबर 2022</li><li>डेटा स्रोत: एसआरए, एमसीजीएम | लीफलेट खोज <a href=\"https://github.com/stefanocudini/leaflet-search\" target=\"_blank\">कॉपीराइट (सी) 2013-2020 स्टेफानो कुदिनी</a></li>"
+			}
+		}
+
+		function showHint(str) {
+			if (str.length == 0) {
+				document.getElementById("txtHint").innerHTML = "";
+				return;
+			} else {
+				const xmlhttp = new XMLHttpRequest();
+				xmlhttp.onload = function () {
+					document.getElementById("txtHint").innerHTML = this.responseText;
+				}
+				xmlhttp.open("GET", "gethint.php?q=" + str);
+				xmlhttp.send();
+			}
+		}
+	</script>
+</body>
+
+</html>
